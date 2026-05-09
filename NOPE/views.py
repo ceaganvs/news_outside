@@ -1,3 +1,10 @@
+"""
+NOPE views module.
+
+Handles all HTTP request/response logic for the News Outside Publishing Engine,
+including authentication, article management, publisher administration,
+reader subscriptions, and newsletter browsing.
+"""
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login, logout, authenticate
@@ -9,6 +16,7 @@ from .models import Article, Newsletter, Publisher, CustomUser
 
 
 def register(request):
+    """Register a new user account with a chosen role (reader, journalist, or editor)."""
     if request.user.is_authenticated:
         return redirect('landing')
 
@@ -82,6 +90,7 @@ def is_editor_or_journalist(user):
 
 
 def landing(request):
+    """Display the public landing page with the latest approved articles."""
     if request.user.is_authenticated:
         articles = Article.objects.filter(approved=True).select_related('author', 'publisher')
     else:
@@ -100,6 +109,7 @@ def home(request):
 
 @login_required
 def dashboard(request):
+    """Display a role-specific dashboard for journalists, editors, and readers."""
     user = request.user
 
     if user.role == 'journalist':
@@ -233,6 +243,11 @@ def like_article(request, article_id):
 @login_required
 @user_passes_test(is_journalist)
 def create_article(request):
+    """Allow a journalist to write and submit a new article.
+
+    Independent articles (no publisher) publish immediately.
+    Publisher-affiliated articles enter an editor approval queue.
+    """
     if request.method == 'POST':
         title = request.POST.get('title')
         content = request.POST.get('content')
