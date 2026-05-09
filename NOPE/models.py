@@ -1,3 +1,9 @@
+"""
+NOPE models module.
+
+Defines the database models for the News Outside Publishing Engine:
+CustomUser, Publisher, Article, and Newsletter.
+"""
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.exceptions import ValidationError
