@@ -24,8 +24,8 @@ Generated Sphinx documentation is in `docs/build/html/`. Open
 ## Option 1 — Virtual Environment
 
 ```powershell
-git clone https://github.com/ceaganvs/red-haired-pirates.git
-cd red-haired-pirates
+git clone https://github.com/ceaganvs/news_outside.git
+cd news_outside
 
 python -m venv venv
 venv\Scripts\activate         # Windows
@@ -47,8 +47,8 @@ Open http://127.0.0.1:8000/
 Requires Docker and Docker Compose.
 
 ```bash
-git clone https://github.com/ceaganvs/red-haired-pirates.git
-cd red-haired-pirates
+git clone https://github.com/ceaganvs/news_outside.git
+cd news_outside
 
 docker compose up --build
 
