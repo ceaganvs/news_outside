@@ -1,3 +1,9 @@
+"""
+NOPE signals module.
+
+Handles post-save signals for the Article model: notifies subscribers by email
+and posts to X (Twitter) when an article is approved and published.
+"""
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
@@ -8,6 +14,7 @@ from datetime import datetime
 
 @receiver(post_save, sender=Article)
 def handle_article_approval(sender, instance, created, **kwargs):
+    """Fire email and X notifications when an article is freshly approved."""
     if not created and instance.approved and instance.approved_at:
         time_since_approval = (datetime.now(instance.approved_at.tzinfo) - instance.approved_at).total_seconds()
         if time_since_approval > 5:
