@@ -1,148 +1,105 @@
-# Red-Haired Pirates
+# News Outside
 
-Django website about Shanks from One Piece featuring crew member signup functionality.
-
-## Prerequisites
-
-- Python 3.8 or higher
-- Docker and Docker Compose (for Docker deployment)
-
-## Setup and Run Instructions
-
-### Option 1: Using Virtual Environment (venv)
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ceaganvs/red-haired-pirates.git
-   cd red-haired-pirates
-   ```
-
-2. **Create and activate virtual environment**
-   
-   On Windows:
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
-   
-   On macOS/Linux:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Navigate to project directory**
-   ```bash
-   cd myproject
-   ```
-
-5. **Run database migrations**
-   ```bash
-   python manage.py migrate
-   ```
-
-6. **Collect static files**
-   ```bash
-   python manage.py collectstatic --noinput
-   ```
-
-7. **Start the development server**
-   ```bash
-   python manage.py runserver
-   ```
-
-8. **Access the application**
-   
-   Open your browser and visit: `http://127.0.0.1:8000/`
-
-9. **Deactivate virtual environment (when done)**
-   ```bash
-   deactivate
-   ```
-
-### Option 2: Using Docker
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ceaganvs/red-haired-pirates.git
-   cd red-haired-pirates
-   ```
-
-2. **Build and run with Docker Compose**
-   ```bash
-   docker-compose up --build
-   ```
-
-3. **Access the application**
-   
-   Open your browser and visit: `http://127.0.0.1:8000/`
-
-4. **Stop the containers**
-   ```bash
-   docker-compose down
-   ```
-
-## Security Notes
-
-**Important:** This project uses Django's built-in SECRET_KEY for demonstration purposes. For production deployment:
-
-1. **Generate a new SECRET_KEY:**
-   ```python
-   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-   ```
-
-2. **Set it as an environment variable:**
-   
-   On Windows:
-   ```bash
-   set DJANGO_SECRET_KEY=your-generated-secret-key-here
-   ```
-   
-   On macOS/Linux:
-   ```bash
-   export DJANGO_SECRET_KEY=your-generated-secret-key-here
-   ```
-
-3. **Update settings.py** to use the environment variable:
-   ```python
-   SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-key-for-dev')
-   ```
-
-**Never commit passwords, API keys, or secret keys to public repositories.**
+Django news publishing platform with role-based access control, publisher management, reader subscriptions, and a RESTful API.
 
 ## Features
 
-- Home page with Shanks biography
-- About page with character background
-- Contact page
-- Join Crew - Database-driven signup system
-- Crew Members - View all registered crew members
+- **3 User Roles**: Reader, Journalist, Editor
+- **Publishers**: Editors create publishers; journalists and editors belong to a publisher
+- **Article Workflow**: Independent journalists publish directly; publisher-affiliated articles require editor approval
+- **Subscriptions**: Readers subscribe to publishers or individual journalists
+- **Email Notifications**: Subscribers are emailed when a new article is approved or published
+- **Newsletters**: Curated article collections created by journalists and editors
+- **RESTful API**: Token authentication, full CRUD, role-based access
+- **X (Twitter) Integration**: Posts to X when an article is approved (requires API credentials)
 
-## Technology Stack
+## Setup
 
-- Django 5.0.1
-- SQLite3 database
-- Bootstrap 5.3.2
-- Docker support included
-- Contact page
-- SQLite3 database integration
-- Bootstrap 5 responsive design
-- Docker support
+```powershell
+# Install dependencies
+pip install -r requirements.txt
 
-## Pages
+# Run migrations
+python manage.py migrate
 
-- Home: `/`
-- Biography: `/about/`
-- Join Crew: `/join/`
-- Crew Members: `/crew/`
-- Contact: `/contact/`
-- Admin: `/admin/`
+# Set up groups and permissions
+python manage.py setup_groups
 
-## BTW
+# Create superuser
+python manage.py createsuperuser
 
-Bankai
+# Run development server
+python manage.py runserver
+```
+
+## X (Twitter) API Configuration
+
+To enable posting to X when articles are approved, set the following environment variables before starting the server.
+
+**Windows (PowerShell):**
+```powershell
+$env:X_API_CONSUMER_KEY     = "your_consumer_key"
+$env:X_API_CONSUMER_SECRET  = "your_consumer_secret"
+$env:X_API_ACCESS_TOKEN     = "your_access_token"
+$env:X_API_ACCESS_TOKEN_SECRET = "your_access_token_secret"
+```
+
+**Linux / macOS:**
+```bash
+export X_API_CONSUMER_KEY="your_consumer_key"
+export X_API_CONSUMER_SECRET="your_consumer_secret"
+export X_API_ACCESS_TOKEN="your_access_token"
+export X_API_ACCESS_TOKEN_SECRET="your_access_token_secret"
+```
+
+These credentials come from your app at [developer.x.com](https://developer.x.com). You need a project with **Read and Write** permissions. If the variables are not set the server still runs normally — it will just log a message instead of posting to X.
+
+## API Endpoints
+
+| Method | Endpoint | Access |
+|--------|----------|--------|
+| POST | `/api/token/` | Anyone — returns auth token |
+| GET | `/api/articles/` | Public (approved articles) |
+| POST | `/api/articles/` | Journalists only |
+| GET | `/api/articles/<id>/` | Public |
+| PUT/PATCH | `/api/articles/<id>/` | Author or Editor |
+| DELETE | `/api/articles/<id>/` | Editor only |
+| POST | `/api/articles/<id>/approve/` | Editors only |
+| GET | `/api/articles/subscribed/` | Readers — returns subscribed content |
+| GET | `/api/newsletters/` | Authenticated users |
+| POST | `/api/newsletters/` | Journalists and Editors |
+| GET | `/api/publishers/` | Authenticated users |
+| GET | `/api/users/me/` | Authenticated users |
+| POST | `/api/users/<id>/subscribe_publisher/` | Readers only |
+| POST | `/api/users/<id>/subscribe_journalist/` | Readers only |
+
+## Web Routes
+
+- `/` — Latest approved articles (landing page)
+- `/register/` — Create account (reader, journalist, or editor)
+- `/login/` — Login
+- `/dashboard/` — Role-specific dashboard
+- `/publishers/` — Browse all publishers
+- `/publishers/create/` — Create publisher (editors only)
+- `/subscriptions/` — Manage subscriptions (readers only)
+- `/articles/create/` — Write article (journalists only)
+- `/editor/pending/` — Review pending articles (editors only)
+
+## Article Approval Rules
+
+- **Independent journalist** (no publisher selected): article publishes immediately and subscribers are notified by email.
+- **Publisher-affiliated article**: article enters a pending queue and requires approval from an editor before publishing.
+
+## Running Tests
+
+```powershell
+python manage.py test NOPE
+```
+
+23 automated tests covering models, API endpoints, permissions, signals, and privacy settings.
+
+## Access
+
+- Web: http://127.0.0.1:8000/
+- Admin: http://127.0.0.1:8000/admin/
+- API browser: http://127.0.0.1:8000/api/
